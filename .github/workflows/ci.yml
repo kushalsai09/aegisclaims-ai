@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: insurance_test
+          POSTGRES_USER: insurance
+          POSTGRES_PASSWORD: insurance_test_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U insurance -d insurance_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://insurance:insurance_test_only@localhost:5432/insurance_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e '.[dev]'
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy packages/backend/src
+      - run: pytest --cov=insurance_platform --cov-report=term-missing --cov-fail-under=85
+
+  infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.13.5"
+      - run: terraform fmt -check -recursive infrastructure/terraform
+      - run: terraform -chdir=infrastructure/terraform init -backend=false
+      - run: terraform -chdir=infrastructure/terraform validate
+      - run: node scripts/validate-docs.mjs
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: python -m pip install -e . pip-audit
+      - run: pip-audit
+      - run: npm ci
+      - run: npm audit --audit-level=high
+      - name: Reject obvious committed secrets
+        run: |
+          if git grep -nE '(AKIA[0-9A-Z]{16}|-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----)' -- ':!docs/**'; then
+            echo "Potential secret material detected"
+            exit 1
+          fi
+
+  containers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: cp .env.example .env
+      - run: docker compose -f infrastructure/docker/compose.yaml config --quiet
+      - run: docker build -f apps/api/Dockerfile -t insurance-api:ci .
+      - run: docker build -f apps/worker/Dockerfile -t insurance-worker:ci .
+      - run: docker build -f apps/web/Dockerfile -t insurance-web:ci .
+      - run: docker compose -f infrastructure/docker/compose.yaml up -d --build --wait
+      - run: BASE_URL=http://localhost:5173 bash scripts/smoke-test.sh
+      - run: BASE_URL=http://localhost:8000 bash scripts/phase2-smoke-test.sh
+      - run: BASE_URL=http://localhost:8000 bash scripts/phase3-smoke-test.sh
+      - run: BASE_URL=http://localhost:5173 bash scripts/phase4-smoke-test.sh
+      - run: BASE_URL=http://localhost:5173 bash scripts/phase5-smoke-test.sh
+      - run: BASE_URL=http://localhost:5173 bash scripts/phase6-smoke-test.sh
+      - run: BASE_URL=http://localhost:5173 bash scripts/phase7-smoke-test.sh
+      - run: bash scripts/phase7-backup-restore-test.sh
+      - if: failure()
+        run: docker compose -f infrastructure/docker/compose.yaml logs api worker web --tail=200
+      - if: always()
+        run: docker compose -f infrastructure/docker/compose.yaml down -v

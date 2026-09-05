@@ -1,0 +1,9 @@
+SYNTHETIC DEMONSTRATION DATA — ESTIMATOR SUPPLEMENT
+
+Claim Number: HVC-SYN-2026-00017
+Property Address: 742 Fictional Harbor Lane, Evanston, IL 60201
+Document Type: contractor estimate
+Estimated Repair Cost: $18,425.00
+Loss Date: 2026-08-14
+
+This fixture exists solely to verify the real browser upload workflow.

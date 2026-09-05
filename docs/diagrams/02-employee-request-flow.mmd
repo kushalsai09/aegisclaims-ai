@@ -1,0 +1,49 @@
+sequenceDiagram
+  actor E as Employee
+  participant U as Vue application
+  participant A as FastAPI
+  participant Z as Authorization
+  participant D as PostgreSQL
+  participant Q as Queue
+  participant G as LangGraph worker
+  participant R as Retrieval
+  participant M as Model gateway
+  participant V as Validators and rules
+  participant H as Review service
+
+  E->>U: Open authorized claim
+  U->>A: GET claim workspace
+  A->>Z: Authorize tenant, role, assignment
+  Z-->>A: Permit with resource scope
+  A->>D: Load authoritative claim view
+  D-->>A: Claim, document, artifact statuses
+  A-->>U: Workspace
+
+  E->>U: Start analysis
+  U->>A: POST analysis with idempotency key
+  A->>Z: Authorize action
+  A->>D: Commit run, snapshot, outbox event
+  A-->>U: 202 and analysis URL
+  A->>Q: Publish outbox job
+  Q->>G: Deliver job at least once
+  G->>D: Claim idempotent run and load snapshot
+  G->>R: Retrieve authorized evidence
+  R->>D: Hybrid FTS and vector query with filters
+  D-->>R: Ranked evidence objects
+  R-->>G: Evidence and provenance
+  G->>M: Structured task with bounded evidence
+  M-->>G: Parsed output and usage metadata
+  G->>V: Validate citations, policy version, rules, support
+  V-->>G: Results and escalation reasons
+
+  alt Mandatory review
+    G->>H: Create snapshot-bound review task
+    H->>D: Persist interrupt and task
+    G-->>U: SSE status: human review required
+  else Supported decision support
+    G->>D: Persist immutable artifact and audit events
+    G-->>U: SSE status: completed
+  end
+  U->>A: GET artifact, evidence, and assessment
+  A->>Z: Reauthorize resources
+  A-->>U: Authorized decision-support view

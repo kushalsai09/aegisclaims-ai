@@ -1,0 +1,24 @@
+flowchart LR
+  DEV[Pull request] --> STATIC[Docs, format, lint, type, schema checks]
+  STATIC --> UNIT[Unit, rule, auth, adversarial tests]
+  UNIT --> INT[Ephemeral adapter integration tests]
+  INT --> GOLDEN[Deterministic golden regression suite]
+  GOLDEN --> SEC[Secret, dependency, SBOM, image, and IaC scans]
+  SEC --> PLAN[Terraform validate and speculative plan]
+  PLAN --> REVIEW{Review and checks pass?}
+  REVIEW -- No --> DEV
+  REVIEW -- Yes --> BUILD[Build once and sign immutable artifacts]
+  BUILD --> ECR[ECR image digest and release manifest]
+  ECR --> STAGE[Deploy to staging]
+  STAGE --> SMOKE[Migration, contract, E2E, accessibility, golden canary]
+  SMOKE --> APPROVE{Protected production approval}
+  APPROVE -- No --> HOLD[Hold release]
+  APPROVE -- Yes --> PROD[Rolling or blue-green production deployment]
+  PROD --> BAKE[Observe bake window and synthetic canary]
+  BAKE --> HEALTH{Gates healthy?}
+  HEALTH -- Yes --> DONE[Promote release record]
+  HEALTH -- No --> ROLLBACK[Rollback image and configuration manifest]
+
+  OIDC[GitHub Actions OIDC and least-privilege roles] -. authenticates .-> STAGE
+  OIDC -. authenticates .-> PROD
+  PAID[Protected scheduled paid-provider evaluation] -. supplies approved AI evidence .-> APPROVE

@@ -1,0 +1,29 @@
+flowchart LR
+  U[Authorized upload intent] --> Q[Quarantine object]
+  Q --> V{Type, size, magic bytes, checksum valid?}
+  V -- No --> X[Reject and audit]
+  V -- Yes --> S[Malware scan interface]
+  S --> C{Clean?}
+  C -- No or unknown --> I[Isolate or fail safely]
+  C -- Yes --> A[Accept immutable original]
+  A --> E[Text, layout, and OCR adapter]
+  E --> D[Classify with abstain state]
+  D --> N[Normalize while preserving offsets]
+  N --> P[Flag injection indicators]
+  P --> K[Structure-aware chunking]
+  K --> M[Attach tenant, policy, version, access, provenance metadata]
+  M --> F[Build PostgreSQL FTS representation]
+  M --> B[Embedding gateway]
+  B --> G[Store pgvector embedding]
+  F --> R[Versioned index manifest]
+  G --> R
+  R --> T{Quality and completeness checks pass?}
+  T -- Yes --> READY[Mark index version ready and publish event]
+  T -- No --> PARTIAL[Mark partial or failed; retry or review]
+
+  DB[(PostgreSQL metadata)] --- V
+  OBJ[(S3-compatible object storage)] --- Q
+  OBJ --- A
+  AUDIT[Audit and OpenTelemetry] -. observes .-> U
+  AUDIT -. observes .-> READY
+  AUDIT -. observes .-> PARTIAL

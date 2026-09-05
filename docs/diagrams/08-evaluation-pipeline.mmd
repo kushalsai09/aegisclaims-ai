@@ -1,0 +1,25 @@
+flowchart LR
+  G[Versioned synthetic golden dataset] --> M[Immutable run manifest]
+  C[Candidate graph, prompt, model, retrieval, rules] --> M
+  B[Approved baseline manifest and results] --> COMPARE
+  M --> INGEST[Ingestion and extraction evaluators]
+  M --> RET[Retrieval benchmark]
+  M --> GEN[Generation and citation evaluators]
+  M --> AGENT[Graph and tool evaluators]
+  M --> SYS[Latency, reliability, and cost evaluators]
+  INGEST --> DET[Deterministic results]
+  RET --> DET
+  GEN --> HUMAN[Human labels and calibrated judge where justified]
+  AGENT --> DET
+  SYS --> DET
+  DET --> COMPARE[Paired comparison by metric and scenario slice]
+  HUMAN --> COMPARE
+  COMPARE --> GATE{Release gates pass?}
+  GATE -- No --> FAIL[Block, diagnose, and add regression case]
+  GATE -- Needs adjudication --> REVIEW[Human evaluation review]
+  REVIEW --> GATE
+  GATE -- Yes --> REGISTRY[Approve immutable release manifest]
+  REGISTRY --> CANARY[Staging and production synthetic canary]
+  CANARY --> ONLINE[Version-stratified online monitoring and feedback]
+  ONLINE --> TRIAGE[Failure harvesting]
+  TRIAGE --> G

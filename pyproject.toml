@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "enterprise-ai-insurance-platform"
+version = "0.1.0"
+description = "Production-oriented walking skeleton for a synthetic insurance operations platform"
+readme = "README.md"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "alembic>=1.16,<2",
+  "argon2-cffi>=25.1,<26",
+  "boto3>=1.39,<2",
+  "fastapi>=0.116,<1",
+  "httpx>=0.28,<1",
+  "langgraph>=1.2,<2",
+  "opentelemetry-api>=1.35,<2",
+  "opentelemetry-exporter-otlp-proto-http>=1.35,<2",
+  "opentelemetry-instrumentation-fastapi>=0.56b0,<1",
+  "opentelemetry-instrumentation-sqlalchemy>=0.56b0,<1",
+  "opentelemetry-sdk>=1.35,<2",
+  "prometheus-client>=0.22,<1",
+  "psycopg[binary]>=3.2,<4",
+  "pyjwt[crypto]>=2.10,<3",
+  "pypdf>=6.0,<7",
+  "pydantic-settings>=2.10,<3",
+  "python-multipart>=0.0.20,<1",
+  "redis>=6.2,<7",
+  "reportlab>=4.4,<5",
+  "sqlalchemy>=2.0,<3",
+  "structlog>=25.4,<26",
+  "uvicorn[standard]>=0.35,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "locust>=2.41,<3",
+  "mypy>=1.17,<2",
+  "pre-commit>=4.2,<5",
+  "pytest>=9.0.3,<10",
+  "pytest-cov>=6.2,<7",
+  "ruff>=0.12,<1",
+  "types-reportlab>=4.4,<5",
+]
+
+[tool.setuptools]
+package-dir = {"" = "packages/backend/src"}
+
+[tool.setuptools.packages.find]
+where = ["packages/backend/src"]
+
+[tool.pytest.ini_options]
+addopts = "--strict-config --strict-markers -q"
+testpaths = ["tests/backend", "tests/system"]
+markers = [
+  "integration: requires a PostgreSQL service",
+  "system: exercises multiple application boundaries",
+]
+filterwarnings = [
+  "ignore:Using `httpx` with `starlette.testclient` is deprecated:starlette.exceptions.StarletteDeprecationWarning",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["insurance_platform"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 80
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["packages/backend/src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF", "ASYNC", "S"]
+ignore = ["S101"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S105", "S106", "S608"]
+"packages/backend/src/insurance_platform/seed.py" = ["S105", "S106"]
+"packages/backend/src/insurance_platform/application/schemas.py" = ["S105"]
+"packages/backend/src/insurance_platform/synthetic/generator.py" = ["S311"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+packages = ["insurance_platform"]
+plugins = ["pydantic.mypy"]
+
+[[tool.mypy.overrides]]
+module = ["argon2.*", "boto3.*", "botocore.*"]
+ignore_missing_imports = true

@@ -1,0 +1,7 @@
+CONTRACTOR ESTIMATE
+SYNTHETIC DEMONSTRATION DATA
+Contractor: Browser Validation Synthetic Repairs LLC
+Property Address: 1842 Example Ridge Lane, Northfield, IL 60093
+Reported Loss Date: 2026-08-14
+Estimate Amount: $10425.00
+Reported Damage: Replace ten fictional shingles and four fictional siding panels.

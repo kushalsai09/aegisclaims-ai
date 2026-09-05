@@ -1,0 +1,18 @@
+{
+  "name": "enterprise-ai-insurance-platform",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/web"
+  ],
+  "scripts": {
+    "build": "npm run build --workspace @insurance-ops/web",
+    "lint": "npm run lint --workspace @insurance-ops/web",
+    "test": "npm run test --workspace @insurance-ops/web",
+    "typecheck": "npm run typecheck --workspace @insurance-ops/web"
+  },
+  "engines": {
+    "node": ">=22 <25",
+    "npm": ">=10 <12"
+  }
+}

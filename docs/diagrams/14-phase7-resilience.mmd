@@ -1,0 +1,19 @@
+sequenceDiagram
+  participant ALB as ALB / client
+  participant API as API
+  participant DB as PostgreSQL
+  participant OBJ as Object storage
+  participant Q as Valkey queue/limits
+  ALB->>API: GET /health/live
+  API-->>ALB: 200 process ok
+  ALB->>API: GET /health/ready
+  API->>DB: SELECT 1
+  API->>OBJ: health check
+  API->>Q: ping
+  alt every dependency available
+    API-->>ALB: 200 ready
+  else dependency unavailable or raises
+    API-->>ALB: 503 not_ready (sanitized)
+  end
+  Note over API,Q: Protected operations fail closed if shared limiter is unavailable
+

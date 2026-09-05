@@ -1,0 +1,11 @@
+flowchart LR
+  U[Authorized employee] --> A[Server authorization]
+  A --> R[Phase 3 retrieval]
+  R --> P[Versioned prompt boundary]
+  P --> M[Model provider port]
+  M --> S[Strict schema validation]
+  S --> C[Citation and policy validation]
+  C --> F[Safety and freshness validation]
+  F --> B[Audited evidence brief]
+  B --> H[Human reviewer]
+  M -. no tools or action authority .-> X[Consequential actions disabled]

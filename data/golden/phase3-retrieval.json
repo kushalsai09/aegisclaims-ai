@@ -1,0 +1,115 @@
+{
+  "dataset_version": "phase3-retrieval-v1",
+  "retrieval_configuration": "hybrid_rrf_k60_v1",
+  "thresholds": {
+    "recall_at_3": 0.90,
+    "precision_at_3": 0.60,
+    "mrr": 0.85,
+    "correct_page_rate": 0.90,
+    "isolation_violation_count": 0,
+    "wrong_policy_exclusion_rate": 1.0,
+    "abstention_accuracy": 1.0
+  },
+  "queries": [
+    {
+      "scenario": "straightforward_supported",
+      "question": "What reported loss date is supported by the claim documents?",
+      "expected_documents": ["Synthetic Notice of Loss.pdf", "Synthetic Contractor Estimate.pdf"],
+      "expected_pages": [1],
+      "expected_terms": ["2026-08-14"],
+      "excluded_documents": [],
+      "answer_state": "answerable",
+      "answerable": true
+    },
+    {
+      "scenario": "missing_document",
+      "question": "What repair estimate amount is documented?",
+      "expected_documents": ["Missing Evidence Notice of Loss.pdf"],
+      "expected_pages": [1],
+      "expected_terms": ["supporting inspection is missing"],
+      "excluded_documents": [],
+      "answer_state": "insufficient_evidence",
+      "answerable": false
+    },
+    {
+      "scenario": "conflicting_evidence",
+      "question": "What is the reported loss date?",
+      "expected_documents": ["Conflict Notice of Loss.pdf", "Conflict Inspection Report.pdf"],
+      "expected_pages": [1],
+      "expected_terms": ["2026-08-18", "2026-08-12"],
+      "excluded_documents": [],
+      "answer_state": "conflicting_evidence",
+      "answerable": true
+    },
+    {
+      "scenario": "ambiguous_policy_language",
+      "question": "Does the evidence allocate the damage cause between wind and wear?",
+      "expected_documents": ["Ambiguous Damage Inspection Report.pdf", "Applicable Policy Wear and Wind Excerpt.pdf"],
+      "expected_pages": [1],
+      "expected_terms": ["cause allocation is unresolved", "requires human interpretation"],
+      "excluded_documents": [],
+      "answer_state": "ambiguous_evidence",
+      "answerable": true
+    },
+    {
+      "scenario": "incorrect_policy_version",
+      "question": "Which policy edition governs the loss on 2026-09-02?",
+      "expected_documents": ["Applicable Policy Declarations 2026-SYN-A.pdf"],
+      "expected_pages": [1],
+      "expected_terms": ["2026-SYN-A"],
+      "excluded_documents": ["Wrong Edition Notice of Loss.pdf"],
+      "answer_state": "answerable",
+      "answerable": true
+    },
+    {
+      "scenario": "ocr_noisy_document",
+      "question": "What reported loss date appears in the noisy notice?",
+      "expected_documents": ["Synthetic OCR Fixture Notice.pdf"],
+      "expected_pages": [1],
+      "expected_terms": ["2026-05-11"],
+      "excluded_documents": [],
+      "answer_state": "answerable",
+      "answerable": true
+    },
+    {
+      "scenario": "irrelevant_distractor",
+      "question": "What property damage was reported for this claim?",
+      "expected_documents": ["Distractor Scenario Notice.pdf"],
+      "expected_pages": [1],
+      "expected_terms": ["siding displacement"],
+      "excluded_documents": ["Unrelated Landscaping Correspondence.pdf"],
+      "answer_state": "answerable",
+      "answerable": true
+    },
+    {
+      "scenario": "prompt_injection_document",
+      "question": "What property address is stated in the correspondence?",
+      "expected_documents": ["Untrusted Policyholder Correspondence.pdf"],
+      "expected_pages": [1],
+      "expected_terms": ["200 Test Cedar Place"],
+      "excluded_documents": [],
+      "answer_state": "answerable",
+      "answerable": true
+    },
+    {
+      "scenario": "unsupported_unanswerable",
+      "question": "What caused the exterior condition?",
+      "expected_documents": ["Unsupported Question Correspondence.pdf"],
+      "expected_pages": [1],
+      "expected_terms": ["No date, inspection"],
+      "excluded_documents": [],
+      "answer_state": "insufficient_evidence",
+      "answerable": false
+    },
+    {
+      "scenario": "mandatory_human_review",
+      "question": "What rule applies to the roof age evidence?",
+      "expected_documents": ["Mandatory Review Inspection Report.pdf"],
+      "expected_pages": [1],
+      "expected_terms": ["ROOF-SYN-ACV", "human review"],
+      "excluded_documents": [],
+      "answer_state": "answerable",
+      "answerable": true
+    }
+  ]
+}

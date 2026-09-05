@@ -1,0 +1,13 @@
+flowchart LR
+  Browser[Employee browser] -->|Email and password| Login[Local account boundary]
+  Login --> Argon[Argon2id verification]
+  Argon --> Session[(Hashed revocable session)]
+  Browser -->|HttpOnly cookie| API[FastAPI and server RBAC]
+  IdP[Future enterprise OIDC IdP] -. verified subject .-> API
+  API --> Retrieval[Authorized retrieval]
+  Retrieval --> Port[Application ModelProvider port]
+  Port --> Deterministic[Deterministic CI provider]
+  Port -. explicit configuration .-> Bedrock[Amazon Bedrock Converse adapter]
+  Bedrock --> Validation[Schema citation and safety validation]
+  Deterministic --> Validation
+  Validation --> Human[Authorized human review]

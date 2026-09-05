@@ -1,0 +1,22 @@
+flowchart LR
+  Q[Employee question and claim context] --> A[Authorize and resolve resource scope]
+  A --> T[Typed retrieval request]
+  T --> H[Hard tenant, access, policy, edition, effective-date filters]
+  H --> L[PostgreSQL full-text search]
+  H --> V[pgvector semantic search]
+  L --> F[Versioned reciprocal-rank fusion]
+  V --> F
+  F --> R[Optional bounded reranker]
+  R --> D[Deduplicate and diversify]
+  D --> E[Evidence objects with source spans and stage scores]
+  E --> C[Prompt assembly: evidence is untrusted data]
+  C --> M[Model gateway with structured schema]
+  M --> O[Assertion and citation objects]
+  O --> CV{Schema, authorization, span, snapshot, applicability valid?}
+  CV -- No --> U[Remove unsupported assertion, abstain, or escalate]
+  CV -- Yes --> S[Supported employee-facing artifact]
+
+  MANIFEST[Index and retrieval version manifest] -. configures .-> H
+  MANIFEST -. configures .-> F
+  TRACE[Retrieval run, metrics, trace, audit] -. records .-> E
+  TRACE -. records .-> CV

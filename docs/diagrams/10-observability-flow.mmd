@@ -1,0 +1,27 @@
+flowchart LR
+  EDGE[ALB and API ingress] --> TRACE[Correlation and trace context]
+  TRACE --> API[FastAPI spans and structured logs]
+  TRACE --> JOB[Queue and worker spans]
+  TRACE --> GRAPH[LangGraph node and tool spans]
+  TRACE --> RAG[Retrieval and citation metrics]
+  TRACE --> MODEL[Model usage, latency, cost, outcome]
+  TRACE --> REVIEW[Human review events]
+  API --> OTEL[OpenTelemetry collector]
+  JOB --> OTEL
+  GRAPH --> OTEL
+  RAG --> OTEL
+  MODEL --> OTEL
+  OTEL --> OBS[(Metrics, logs, and traces backend)]
+  OBS --> DASH[Health, quality, cost, workflow, security dashboards]
+  OBS --> ALERT[Actionable alerts and runbooks]
+
+  API --> AUDIT[Append-only audit service]
+  GRAPH --> AUDIT
+  REVIEW --> AUDIT
+  AUDIT --> ASTORE[(Durable integrity-verifiable audit store)]
+  ASTORE --> INVESTIGATE[Authorized reconstruction and compliance views]
+
+  EVAL[Evaluation results and release manifests] --> DASH
+  CATALOG[Version catalog: graph, prompt, model, retrieval, rules] --> INVESTIGATE
+  POLICY[Redaction, minimization, retention, access policy] -. governs .-> OTEL
+  POLICY -. governs .-> ASTORE

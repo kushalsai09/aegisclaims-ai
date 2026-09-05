@@ -1,0 +1,20 @@
+flowchart LR
+  User[Employee browser] -->|HTTPS| ALB[Application Load Balancer]
+  ALB --> WEB[2+ ECS web tasks]
+  ALB --> API[2+ ECS API tasks]
+  API --> RDS[(RDS PostgreSQL Multi-AZ)]
+  API --> S3[(Versioned private S3)]
+  API --> VALKEY[(ElastiCache Valkey Multi-AZ)]
+  API --> IDP[Enterprise OIDC IdP]
+  API --> BEDROCK[Approved Bedrock model]
+  WORKER[2+ ECS worker tasks] --> RDS
+  WORKER --> S3
+  WORKER --> VALKEY
+  API --> OTLP[Private OTLP collector]
+  WORKER --> OTLP
+  WEB --> CW[CloudWatch logs and alarms]
+  API --> CW
+  WORKER --> CW
+  SECRETS[Secrets Manager references] --> API
+  SECRETS --> WORKER
+

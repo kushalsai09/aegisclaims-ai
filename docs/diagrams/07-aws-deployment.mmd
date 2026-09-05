@@ -1,0 +1,44 @@
+flowchart TB
+  EMP[Internal employee browser] --> DNS[DNS and TLS]
+  DNS --> WAF[WAF]
+  WAF --> ALB[Application Load Balancer]
+  IDP[Cognito or federated OIDC] --> EMP
+
+  subgraph VPC[VPC across multiple availability zones]
+    subgraph Private[Private subnets]
+      API[ECS Fargate API service]
+      WORKER[ECS Fargate worker service]
+      OTEL[OpenTelemetry collector]
+      DB[(Aurora or RDS PostgreSQL with pgvector)]
+    end
+    ALB --> API
+    API -. validates OIDC and maps authorization context .-> IDP
+    API --> DB
+    WORKER --> DB
+    API --> OTEL
+    WORKER --> OTEL
+  end
+
+  API --> S3[(S3 documents and artifacts)]
+  API --> SQS[[SQS jobs and DLQs]]
+  SQS --> WORKER
+  API --> EB[EventBridge]
+  WORKER --> EB
+  WORKER --> BEDROCK[Amazon Bedrock]
+  WORKER --> S3
+  OTEL --> CW[CloudWatch logs, metrics, traces, alarms]
+  ECR[ECR immutable images] --> API
+  ECR --> WORKER
+  SECRETS[Secrets Manager] --> API
+  SECRETS --> WORKER
+  KMS[KMS] -. encrypts .-> DB
+  KMS -. encrypts .-> S3
+  KMS -. encrypts .-> SQS
+
+  LAMBDA[Lambda: short event adapters] -. optional bounded handlers .-> EB
+  TEXTRACT[Textract] -. optional measured OCR .-> WORKER
+  OPENSEARCH[OpenSearch] -. optional benchmark-driven retrieval .-> WORKER
+  AGENTCORE[Bedrock AgentCore] -. optional isolated spike .-> WORKER
+  SAGEMAKER[SageMaker] -. optional validated ML use case .-> WORKER
+  TF[Terraform and CI OIDC deployment role] --> ECR
+  TF --> VPC

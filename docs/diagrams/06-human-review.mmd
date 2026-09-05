@@ -1,0 +1,17 @@
+flowchart TB
+  W[Structured review artifact] --> T{Mandatory review trigger?}
+  T -- No --> C[Complete nonconsequential evidence artifact]
+  T -- Yes --> P[Persist awaiting human review checkpoint]
+  P --> Q[Create unique shared review task]
+  Q --> R[Authorized reviewer opens claim workspace]
+  R --> Z[Reauthorize tenant claim and role]
+  Z --> S{Checkpoint version current?}
+  S -- No --> STALE[Return 409 and reload]
+  S -- Yes --> E[Show evidence citations signals history and proposals]
+  E --> D{Human artifact action plus reason}
+  D --> DONE[Acknowledge approve proposal or reject proposal]
+  D --> MORE[Request information or return for evidence]
+  DONE --> A[Persist actor action checkpoint event and audit]
+  MORE --> A
+  A --> F[Resume to completed or awaiting additional information]
+  B[Claim approval denial payment external contact or close] -. never available .-> P

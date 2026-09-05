@@ -1,0 +1,73 @@
+flowchart TB
+  subgraph Users[Internal employees]
+    A[Claims Adjuster]
+    H[Supervisor or Human Reviewer]
+    O[Compliance or Operations Reviewer]
+  end
+
+  subgraph Experience[Experience layer]
+    UI[Vue 3 and TypeScript application]
+  end
+
+  subgraph Application[Application layer]
+    API[FastAPI REST and SSE]
+    AUTH[OIDC and authorization service]
+    CLAIMS[Claims domain service]
+    DOCS[Document service]
+    REVIEW[Human review service]
+    EVAL[Evaluation and feedback service]
+  end
+
+  subgraph Intelligence[AI platform layer]
+    GRAPH[LangGraph claims workflow]
+    RULES[Versioned deterministic rules]
+    SUPPORT[Support Assessment]
+    RETRIEVAL[Hybrid retrieval service]
+    MODEL[Model and embedding gateways]
+    TOOLS[Bounded authorized tools]
+  end
+
+  subgraph Data[Data and integration layer]
+    PG[(PostgreSQL and pgvector)]
+    OBJECTS[(S3-compatible object storage)]
+    QUEUE[[Queue adapter]]
+    IDP[OIDC identity provider]
+    PROVIDER[Mock, local, or Amazon Bedrock]
+  end
+
+  subgraph Governance[Cross-cutting governance]
+    AUDIT[Append-only audit]
+    OTEL[OpenTelemetry]
+    SECURITY[Security and policy enforcement]
+  end
+
+  A --> UI
+  H --> UI
+  O --> UI
+  UI --> API
+  API --> AUTH
+  AUTH --> IDP
+  API --> CLAIMS
+  API --> DOCS
+  API --> REVIEW
+  API --> EVAL
+  CLAIMS --> GRAPH
+  GRAPH --> RULES
+  GRAPH --> RETRIEVAL
+  GRAPH --> MODEL
+  GRAPH --> TOOLS
+  GRAPH --> SUPPORT
+  GRAPH --> REVIEW
+  CLAIMS --> PG
+  DOCS --> OBJECTS
+  DOCS --> PG
+  RETRIEVAL --> PG
+  MODEL --> PROVIDER
+  API --> QUEUE
+  QUEUE --> GRAPH
+  Application -. events .-> AUDIT
+  Intelligence -. events .-> AUDIT
+  Application -. telemetry .-> OTEL
+  Intelligence -. telemetry .-> OTEL
+  SECURITY -. enforces .-> Application
+  SECURITY -. constrains .-> Intelligence

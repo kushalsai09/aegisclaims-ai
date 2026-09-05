@@ -1,0 +1,15 @@
+stateDiagram-v2
+  [*] --> Created
+  Created --> GatheringEvidence: durable checkpoint
+  GatheringEvidence --> EvaluatingEvidence: Phase 3 retrieval
+  EvaluatingEvidence --> Failed: provenance or node failure
+  EvaluatingEvidence --> DeterminingReview: citations validated
+  DeterminingReview --> AwaitingHumanReview: mandatory trigger
+  DeterminingReview --> Completed: nonconsequential artifact
+  AwaitingHumanReview --> Completed: authorized artifact action
+  AwaitingHumanReview --> AwaitingAdditionalInformation: request or return
+  AwaitingHumanReview --> Cancelled: authorized cancel
+  AwaitingAdditionalInformation --> GatheringEvidence: bounded retry
+  Failed --> GatheringEvidence: bounded retry
+  Completed --> [*]
+  Cancelled --> [*]

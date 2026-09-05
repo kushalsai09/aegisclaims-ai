@@ -1,0 +1,17 @@
+{
+  "dataset_version": "phase2-synthetic-v1",
+  "policy_identifier": "HVS-HO-000042",
+  "governing_policy_edition": "2026-SYN-A",
+  "scenarios": {
+    "straightforward_supported": {"expected_document_types": ["notice_of_loss", "contractor_estimate"], "relevant_pages": [1], "known_conflicts": [], "known_missing_information": []},
+    "missing_document": {"expected_document_types": ["notice_of_loss"], "relevant_pages": [1], "known_conflicts": [], "known_missing_information": ["inspection_or_damage_report", "estimate"]},
+    "conflicting_evidence": {"expected_document_types": ["notice_of_loss", "inspection_report"], "relevant_pages": [1], "known_conflicts": ["reported_loss_date"], "known_missing_information": []},
+    "ambiguous_policy_language": {"expected_document_types": ["inspection_report", "policy_document"], "relevant_pages": [1], "known_conflicts": [], "known_missing_information": ["cause_allocation"]},
+    "incorrect_policy_version": {"expected_document_types": ["notice_of_loss", "policy_document"], "relevant_pages": [1], "known_conflicts": ["policy_edition"], "known_missing_information": [], "submitted_policy_edition": "2025-SYN-B", "expected_policy_edition": "2026-SYN-A"},
+    "ocr_noisy_document": {"expected_document_types": ["notice_of_loss"], "relevant_pages": [1], "known_conflicts": [], "known_missing_information": [], "ocr_fixture": true, "ocr_runtime_invoked": false},
+    "irrelevant_distractor": {"expected_document_types": ["notice_of_loss", "correspondence"], "relevant_pages": [1], "known_conflicts": [], "known_missing_information": [], "distractor_document": "Unrelated Landscaping Correspondence.pdf"},
+    "prompt_injection_document": {"expected_document_types": ["correspondence"], "relevant_pages": [1], "known_conflicts": [], "known_missing_information": [], "injection_risk": true, "content_authority": "untrusted_data_only"},
+    "unsupported_unanswerable": {"expected_document_types": ["correspondence"], "relevant_pages": [], "known_conflicts": [], "known_missing_information": ["loss_date", "damage_evidence", "inspection"]},
+    "mandatory_human_review": {"expected_document_types": ["inspection_report"], "relevant_pages": [1], "known_conflicts": [], "known_missing_information": [], "mandatory_human_review": true, "rule_label": "SYNTHETIC DEMONSTRATION RULE"}
+  }
+}
